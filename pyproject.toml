@@ -18,6 +18,7 @@ requires-python = ">=3.12,<3.13"
 dynamic = ["version"]
 
 dependencies = [
+    "aiofiles>=25.1.0",
     "textual==8.2.8",
 ]
 
@@ -30,4 +31,5 @@ dev = [
     "pytest>=9.1.1",
     "identify>=2.6.18",
     "prek>=0.4.10",
+    "pytest-asyncio>=1.4.0",
 ]
