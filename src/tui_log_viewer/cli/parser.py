@@ -21,11 +21,29 @@ def _parse_line(line: str) -> str | None:
 
 
 class LogParser:
+    """
+    Parse and follow log files within a directory
+
+    Discovers available log files, allow one to be selected, reads the most recent valid entries,
+    yields newly written valid entries.
+
+    :param directory: The directory to search for log files
+    """
+
+    # TODO: `parse_lines` and `fetch_new_lines` should return the position along with the lines
+    #  in order to identify it within the TUI, to pop a new screen
+
     def __init__(self, directory: str | Path):
         self._directory = Path(directory)
         self._files: dict[str, Path] = self.retrieve_files()
         self._selected_log: Path | None = None
         self._last_position: int | None = None
+
+    def __str__(self):
+        return f"LogParser(directory={self.directory})"
+
+    def __repr__(self):
+        return f"LogParser(directory={self.directory})"
 
     @property
     def files(self) -> dict[str, Path]:
