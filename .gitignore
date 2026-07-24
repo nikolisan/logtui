@@ -11,6 +11,3 @@ wheels/
 
 # Pycharm related
 .idea
-
-# Github workflows
-.github
