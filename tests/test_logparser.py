@@ -72,9 +72,11 @@ def test_logparser_raises_on_invalid_log_type(log_directory: Path):
 async def test_logparser_reads_lines_from_end(log_directory: Path):
     _log = "process_1.log"
     _no_lines = 2
+    log_path = log_directory / _log
     parser = LogParser(directory=log_directory)
     parser.selected_log = _log
     lines = await parser.parse_lines(lines=_no_lines)
+    log_bytes = log_path.read_bytes()
     assert len(lines) == _no_lines
     assert lines[0] == LogEntry(
         timestamp=datetime.strptime(
@@ -83,7 +85,9 @@ async def test_logparser_reads_lines_from_end(log_directory: Path):
         module=f"{_log}.module_2.function",
         level="WARNING",
         message=f"Test log entry 6 for {_log}",
-        start_offset=971,
+        start_offset=log_bytes.index(
+            f"            2026-04-28 13:17:12,114 - {_log}".encode()
+        ),
     )
     assert lines[1] == LogEntry(
         timestamp=datetime.strptime(
@@ -92,7 +96,9 @@ async def test_logparser_reads_lines_from_end(log_directory: Path):
         module=f"{_log}.module_2.function",
         level="INFO",
         message=f"Test log entry 7 for {_log}",
-        start_offset=1118,
+        start_offset=log_bytes.index(
+            f"            2026-04-28 14:17:12,114 - {_log}".encode()
+        ),
     )
 
 
@@ -119,6 +125,7 @@ async def test_logparser_yields_appended_line(log_directory: Path):
     parser = LogParser(directory=log_directory)
     parser.selected_log = log_name
     await parser.parse_lines()
+    append_offset = log_path.stat().st_size
 
     async with aiofiles.open(log_path, mode="ab") as file:
         await file.write((expected + "\n").encode("utf-8"))
@@ -130,7 +137,6 @@ async def test_logparser_yields_appended_line(log_directory: Path):
     finally:
         await follower.aclose()
 
-    _append_offset = " - 1247"
     assert line == LogEntry(
         timestamp=datetime.strptime(
             "2026-04-28 14:18:12,114", "%Y-%m-%d %H:%M:%S,%f"
@@ -138,5 +144,5 @@ async def test_logparser_yields_appended_line(log_directory: Path):
         module=f"{log_name}.module_2.function",
         level="INFO",
         message="Appended log entry",
-        start_offset=1247,
+        start_offset=append_offset,
     )
