@@ -8,7 +8,7 @@ from pathlib import Path
 
 import aiofiles
 
-from tui_log_viewer.cli.mappers import DataclassTypeEnum, mapper
+from tui_log_viewer.cli.mappers import DataclassTypeEnum, LogEntry, mapper
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +89,9 @@ class LogParser:
             _found[file.stem] = file
         return _found
 
-    async def parse_lines(self, lines: int = 10, buffer_size: int = 2048) -> deque[str]:
+    async def parse_lines(
+        self, lines: int = 10, buffer_size: int = 2048
+    ) -> deque[LogEntry]:
         """
         Asynchronously reads the most recent lines from the selected log file ordered from oldest to newest.
         The method allows for 1 to 100 lines to be returned.
@@ -112,7 +114,7 @@ class LogParser:
             raise ValueError("No log file is selected")
 
         _no_lines = max(1, min(lines, 100))
-        _log_lines: deque[str] = deque(maxlen=_no_lines)
+        _log_lines: deque[LogEntry] = deque(maxlen=_no_lines)
 
         async with aiofiles.open(_log, "rb") as f:
             await f.seek(0, os.SEEK_END)
@@ -161,11 +163,15 @@ class LogParser:
         if buffer and encountered < _no_lines:
             decoded = _parse_line(buffer.decode("utf-8", errors="replace"))
             if decoded:
-                _log_lines.appendleft(decoded)
+                _log_lines.appendleft(
+                    mapper.map(decoded + " - 0", DataclassTypeEnum.LOGENTRY)
+                )
 
         return _log_lines
 
-    async def fetch_new_line(self, interval: float = 0.5) -> AsyncGenerator[str, None]:
+    async def fetch_new_line(
+        self, interval: float = 0.5
+    ) -> AsyncGenerator[LogEntry, None]:
         """Asynchronously follow the log file and yield valid log lines.
         Starts reading at the end of the log file and continues polling for new complete lines
         at the specified interval. Partial lines remain unread.
