@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools==83.0.0", "setuptools-scm==10.2.1", "wheel==0.47", "twine==6.2.0", "build==1.5.0"]
+requires = ["setuptools==83.0.0", "setuptools-scm==10.2.1", "wheel==0.47"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
@@ -18,16 +18,38 @@ requires-python = ">=3.12,<3.13"
 dynamic = ["version"]
 
 dependencies = [
+    "aiofiles>=25.1.0",
     "textual==8.2.8",
 ]
 
 [project.scripts]
 logtui = "tui_log_viewer.runners.cli:main"
+generate-stubs = "tui_log_viewer.scripts.generate_colour_stubs:generate"
 
 [dependency-groups]
 dev = [
+    # Linting and formatting
     "ruff>=0.16.0",
-    "pytest>=9.1.1",
+    # Static type checker
+    "pyright>=1.1.411",
+    # Pre-commit hooks
     "identify>=2.6.18",
     "prek>=0.4.10",
+    # Testing frameworks
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    # Validating build distribution
+    "twine>=6.2.0",
 ]
+
+[tool.pyright]
+typeCheckingMode = "strict"
+include = ["src", "tests"]
+exclude = [
+    ".venv",
+    "build",
+    "dist"
+]
+# Ruff handles these diagnostics
+reportUnusedImport = "none"
+reportUnusedVariable = "none"
