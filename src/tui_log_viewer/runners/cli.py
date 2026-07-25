@@ -33,8 +33,8 @@ def main():
             asyncio.run(start_cli_no_tui(args))
     except KeyboardInterrupt:
         logger.info("Stopped following log file")
-    except Exception:
-        logger.exception("Unhandled exception in CLI.")
+    except Exception as e:
+        logger.exception(f"{type(e).__name__}: {e}")  # noqa: TRY401
 
 
 if __name__ == "__main__":

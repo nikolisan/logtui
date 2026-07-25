@@ -24,6 +24,7 @@ dependencies = [
 
 [project.scripts]
 logtui = "tui_log_viewer.runners.cli:main"
+generate-stubs = "tui_log_viewer.scripts.generate_colour_stubs:generate"
 
 [dependency-groups]
 dev = [
