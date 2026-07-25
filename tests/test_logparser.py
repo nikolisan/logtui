@@ -1,9 +1,11 @@
 import asyncio
+from datetime import datetime
 from pathlib import Path
 
 import aiofiles
 import pytest
 
+from tui_log_viewer.cli.mappers import LogEntry
 from tui_log_viewer.cli.parser import LogParser
 
 pytest_plugins = ("pytest_asyncio",)
@@ -81,13 +83,23 @@ async def test_logparser_reads_lines_from_end(log_directory):
     parser.selected_log = _log
     lines = await parser.parse_lines(lines=_no_lines)
     assert len(lines) == _no_lines
-    assert (
-        lines[0]
-        == f"2026-04-28 13:17:12,114 - {_log}.module_2.function - WARNING - Test log entry 6 for {_log}"
+    assert lines[0] == LogEntry(
+        timestamp=datetime.strptime(
+            "2026-04-28 13:17:12,114", "%Y-%m-%d %H:%M:%S,%f"
+        ).astimezone(),
+        module=f"{_log}.module_2.function",
+        level="WARNING",
+        message=f"Test log entry 6 for {_log}",
+        start_offset=971,
     )
-    assert (
-        lines[1]
-        == f"2026-04-28 14:17:12,114 - {_log}.module_2.function - INFO - Test log entry 7 for {_log}"
+    assert lines[1] == LogEntry(
+        timestamp=datetime.strptime(
+            "2026-04-28 14:17:12,114", "%Y-%m-%d %H:%M:%S,%f"
+        ).astimezone(),
+        module=f"{_log}.module_2.function",
+        level="INFO",
+        message=f"Test log entry 7 for {_log}",
+        start_offset=1118,
     )
 
 
@@ -125,4 +137,13 @@ async def test_logparser_yields_appended_line(log_directory):
     finally:
         await follower.aclose()
 
-    assert line == expected
+    _append_offset = " - 1247"
+    assert line == LogEntry(
+        timestamp=datetime.strptime(
+            "2026-04-28 14:18:12,114", "%Y-%m-%d %H:%M:%S,%f"
+        ).astimezone(),
+        module=f"{log_name}.module_2.function",
+        level="INFO",
+        message="Appended log entry",
+        start_offset=1247,
+    )

@@ -8,6 +8,8 @@ from pathlib import Path
 
 import aiofiles
 
+from tui_log_viewer.cli.mappers import DataclassTypeEnum, mapper
+
 logger = logging.getLogger(__name__)
 
 
@@ -125,18 +127,33 @@ class LogParser:
                 # for example pointer=500bytes (left to the start of the file)
                 # -> we only read this amount of bytes
                 read_size = min(buffer_size, pointer)
+                # progress the pointer to point back on the file
                 pointer -= read_size
                 await f.seek(pointer)
                 # Append to stored incomplete lines the new chunk
                 buffer = await f.read(read_size) + buffer
+
+                buffer_end = pointer + len(buffer)
+
                 _lines = buffer.split(b"\n")
                 # Store incomplete lines for next pass
                 buffer = _lines.pop(0)
 
+                # reverse the list so we can retrieve the newest lines first before hitting the limit
+                # for the number of lines
                 for line in reversed(_lines):
+                    # buffer_end stores the position just before the current line
+                    start_offset = buffer_end - len(line)
+                    # backtrack the buffer_end by one character
+                    buffer_end = start_offset - 1
                     decoded = _parse_line(line.decode("utf-8", errors="replace"))
                     if decoded:
-                        _log_lines.appendleft(decoded)
+                        _append_offset = f" - {start_offset!s}"
+                        _log_lines.appendleft(
+                            mapper.map(
+                                decoded + _append_offset, DataclassTypeEnum.LOGENTRY
+                            )
+                        )
                         encountered += 1
                         if encountered == _no_lines:
                             return _log_lines
@@ -180,4 +197,7 @@ class LogParser:
 
                 parsed_line = _parse_line(line.decode("utf-8", errors="replace"))
                 if parsed_line:
-                    yield parsed_line
+                    _append_offset = f" - {pointer!s}"
+                    yield mapper.map(
+                        parsed_line + _append_offset, DataclassTypeEnum.LOGENTRY
+                    )
