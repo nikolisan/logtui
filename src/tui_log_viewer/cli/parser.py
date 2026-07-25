@@ -84,7 +84,7 @@ class LogParser:
             raise FileNotFoundError(log)
 
     def retrieve_files(self) -> dict[str, Path]:
-        _found = {}
+        _found: dict[str, Path] = {}
         for file in self._directory.rglob("*.log"):
             _found[file.stem] = file
         return _found
@@ -105,9 +105,6 @@ class LogParser:
         :return: A queue of decoded log lines in oldest to newest order
         :raises ValueError: If no log file has been selected.
         """
-
-        if not isinstance(lines, int):
-            raise TypeError("`lines` argument must be an integer")
 
         _log = self.selected_log
         if _log is None:
@@ -151,11 +148,14 @@ class LogParser:
                     decoded = _parse_line(line.decode("utf-8", errors="replace"))
                     if decoded:
                         _append_offset = f" - {start_offset!s}"
-                        _log_lines.appendleft(
-                            mapper.map(
-                                decoded + _append_offset, DataclassTypeEnum.LOGENTRY
-                            )
+                        _entry = mapper.map(
+                            decoded + _append_offset, DataclassTypeEnum.LOGENTRY
                         )
+                        if not _entry:
+                            raise RuntimeError(
+                                f"Cannot map line {decoded} to LogEntry."
+                            )
+                        _log_lines.appendleft(_entry)
                         encountered += 1
                         if encountered == _no_lines:
                             return _log_lines
@@ -163,9 +163,10 @@ class LogParser:
         if buffer and encountered < _no_lines:
             decoded = _parse_line(buffer.decode("utf-8", errors="replace"))
             if decoded:
-                _log_lines.appendleft(
-                    mapper.map(decoded + " - 0", DataclassTypeEnum.LOGENTRY)
-                )
+                _entry = mapper.map(decoded + " - 0", DataclassTypeEnum.LOGENTRY)
+                if not _entry:
+                    raise RuntimeError(f"Cannot map line {decoded} to LogEntry.")
+                _log_lines.appendleft(_entry)
 
         return _log_lines
 
@@ -204,6 +205,11 @@ class LogParser:
                 parsed_line = _parse_line(line.decode("utf-8", errors="replace"))
                 if parsed_line:
                     _append_offset = f" - {pointer!s}"
-                    yield mapper.map(
+                    _entry = mapper.map(
                         parsed_line + _append_offset, DataclassTypeEnum.LOGENTRY
                     )
+                    if not _entry:
+                        raise RuntimeError(
+                            f"Cannot map line {parsed_line} to LogEntry."
+                        )
+                    yield _entry

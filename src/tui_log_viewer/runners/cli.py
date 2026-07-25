@@ -1,14 +1,15 @@
+import argparse
 import asyncio
 import logging
 
 from tui_log_viewer.cli import LogParser
-from tui_log_viewer.cli.tools import printer_header, printer
+from tui_log_viewer.cli.tools import printer, printer_header
 from tui_log_viewer.runners.arg_parser import parse_arguments
 
 logger = logging.getLogger(__name__)
 
 
-async def start_cli_no_tui(args):
+async def start_cli_no_tui(args: argparse.Namespace):
     logger.info("Starting CLI without TUI")
     printer_header(args.INPUT.parent)
     log_parser = LogParser(args.INPUT.parent)

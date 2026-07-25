@@ -4,6 +4,7 @@ from pathlib import Path
 
 import aiofiles
 import pytest
+from pytest import TempPathFactory
 
 from tui_log_viewer.cli.mappers import LogEntry
 from tui_log_viewer.cli.parser import LogParser
@@ -12,7 +13,7 @@ pytest_plugins = ("pytest_asyncio",)
 
 
 @pytest.fixture(scope="session")
-def log_directory(tmp_path_factory) -> Path:
+def log_directory(tmp_path_factory: TempPathFactory) -> Path:
     logs = ["process_1.log", "process_2.log"]
     directory = tmp_path_factory.mktemp("logs")
     for log in logs:
@@ -39,13 +40,13 @@ def log_directory(tmp_path_factory) -> Path:
     return directory
 
 
-def test_logparser_finds_logs(log_directory):
+def test_logparser_finds_logs(log_directory: Path):
     parser = LogParser(directory=log_directory)
     assert len(parser.files) == 2
     assert list(parser.files.keys()) == ["process_1", "process_2"]
 
 
-def test_logparser_selects_log(log_directory):
+def test_logparser_selects_log(log_directory: Path):
     parser = LogParser(directory=log_directory)
     _select = "process_1.log"
     parser.selected_log = _select
@@ -53,14 +54,14 @@ def test_logparser_selects_log(log_directory):
     assert selected == log_directory / "process_1.log"
 
 
-def test_logparser_raises_on_invalid_log(log_directory):
+def test_logparser_raises_on_invalid_log(log_directory: Path):
     parser = LogParser(directory=log_directory)
     with pytest.raises(FileNotFoundError, match="invalid"):
         parser.selected_log = "invalid.log"
         _selected = parser.selected_log
 
 
-def test_logparser_raises_on_invalid_log_type(log_directory):
+def test_logparser_raises_on_invalid_log_type(log_directory: Path):
     parser = LogParser(directory=log_directory)
     with pytest.raises(ValueError, match="Log must end with .log"):
         parser.selected_log = "invalid"
@@ -68,15 +69,7 @@ def test_logparser_raises_on_invalid_log_type(log_directory):
 
 
 @pytest.mark.asyncio
-async def test_logparse_parse_lines_raises_value_error(log_directory):
-    parser = LogParser(directory=log_directory)
-    parser.selected_log = "process_1.log"
-    with pytest.raises(TypeError, match="must be an integer"):
-        assert await parser.parse_lines(lines="invalid_type")
-
-
-@pytest.mark.asyncio
-async def test_logparser_reads_lines_from_end(log_directory):
+async def test_logparser_reads_lines_from_end(log_directory: Path):
     _log = "process_1.log"
     _no_lines = 2
     parser = LogParser(directory=log_directory)
@@ -104,7 +97,7 @@ async def test_logparser_reads_lines_from_end(log_directory):
 
 
 @pytest.mark.asyncio
-async def test_logparser_reads_all_lines_if_less_than_requested(log_directory):
+async def test_logparser_reads_all_lines_if_less_than_requested(log_directory: Path):
     _log = "process_1.log"
     _no_lines = 100
     parser = LogParser(directory=log_directory)
@@ -114,7 +107,7 @@ async def test_logparser_reads_all_lines_if_less_than_requested(log_directory):
 
 
 @pytest.mark.asyncio
-async def test_logparser_yields_appended_line(log_directory):
+async def test_logparser_yields_appended_line(log_directory: Path):
     log_name = "process_1.log"
     log_path = log_directory / log_name
     expected = (

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
+from typing import Any
 
 
 class DataclassTypeEnum(Enum):
@@ -18,9 +19,7 @@ class LogEntry:
 
 class Mapper:
     @classmethod
-    def map(cls, obj, dataclass_type: DataclassTypeEnum) -> LogEntry | None:
-        if not isinstance(dataclass_type, DataclassTypeEnum):
-            raise TypeError(f"Expected DataclassTypeEnum, got {type(dataclass_type)}")
+    def map(cls, obj: Any, dataclass_type: DataclassTypeEnum) -> LogEntry | None:
         if isinstance(obj, str) and dataclass_type == DataclassTypeEnum.LOGENTRY:
             return cls._map_logentry(line=obj)
 

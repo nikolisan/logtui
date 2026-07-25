@@ -17,7 +17,7 @@ def printer(entry: LogEntry):
 
     print(
         f"{timestamp:19} | "
-        f"{textwrap.shorten(module, 50):<50} | "
-        f"{textwrap.shorten(level, 7):<7} | "
-        f"{textwrap.shorten(message, 50):<50}"
+        + f"{textwrap.shorten(module, 50):<50} | "
+        + f"{textwrap.shorten(level, 7):<7} | "
+        + f"{textwrap.shorten(message, 50):<50}"
     )
