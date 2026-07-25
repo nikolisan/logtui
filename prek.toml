@@ -8,3 +8,16 @@ hooks = [
   # Run the formatter.
   { id = "ruff-format", types_or = ["python", "pyi"] },
 ]
+
+[[repos]]
+repo = "local"
+hooks = [
+  {
+    id = "pyright",
+    name = "pyright",
+    entry = "uv run pyright",
+    language = "system",
+    pass_filenames = false,
+    types_or = ["python", "pyi", "pyproject"]
+  },
+]
