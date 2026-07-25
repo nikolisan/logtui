@@ -11,3 +11,6 @@ wheels/
 
 # Pycharm related
 .idea
+
+# Logs
+*.log
