@@ -21,7 +21,7 @@ def parse_arguments(argv: Sequence[str] | None = None) -> argparse.Namespace:
         "-f", "--follow", action="store_true", help="Follow log entries"
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     if args.engine == "log":
         if not args.INPUT.is_file():

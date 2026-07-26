@@ -18,3 +18,7 @@ uv sync
 
 uv run logtui
 ```
+
+
+## Todos
+- [ ] Implement a caching system for retrieved logs 
