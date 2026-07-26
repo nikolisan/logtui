@@ -1,0 +1,12 @@
+Screen {
+    align: center middle;
+}
+
+FileBrowser {
+    dock: left;
+    width: 20%;
+}
+
+FileBrowser.hidden {
+    display: none;
+}

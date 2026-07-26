@@ -35,11 +35,14 @@ class LogParser:
     # TODO: `parse_lines` and `fetch_new_lines` should return the position along with the lines
     #  in order to identify it within the TUI, to pop a new screen
 
-    def __init__(self, directory: str | Path):
+    def __init__(self, directory: str | Path, auto_retrieve: bool = True):
         self._directory = Path(directory)
-        self._files: dict[str, Path] = self.retrieve_files()
         self._selected_log: Path | None = None
         self._last_position: int | None = None
+        if auto_retrieve:
+            self._files: dict[str, Path] = self.retrieve_files()
+        else:
+            self._files = {}
 
     def __str__(self):
         return f"LogParser(directory={self.directory})"
@@ -68,6 +71,8 @@ class LogParser:
         :raises ValueError: If the log file has incorrect extension
         :raises FileNotFoundError: If the log file does not exist
         """
+        if not self.files:
+            raise RuntimeError("No log files are found in the folder")
 
         if log is None:
             self._selected_log = None
@@ -77,11 +82,15 @@ class LogParser:
             raise ValueError(f"Log must end with .log: {log}")
 
         log = log.split(".log")[0]
-        _log = self.files.get(log, None)
+        _log = self.files.get(log, None)  # pyright: ignore
         if _log:
             self._selected_log = _log
         else:
             raise FileNotFoundError(log)
+
+    def _ensure_files(self) -> None:
+        if not self._files:
+            self._files = self.retrieve_files()
 
     def retrieve_files(self) -> dict[str, Path]:
         _found: dict[str, Path] = {}

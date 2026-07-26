@@ -9,6 +9,8 @@ from pytest import TempPathFactory
 from tui_log_viewer.cli.mappers import LogEntry
 from tui_log_viewer.cli.parser import LogParser
 
+# pyright: ignore[reportUnknownMemberType]
+
 pytest_plugins = ("pytest_asyncio",)
 
 

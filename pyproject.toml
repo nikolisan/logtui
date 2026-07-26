@@ -19,11 +19,12 @@ dynamic = ["version"]
 
 dependencies = [
     "aiofiles>=25.1.0",
+    "httpx>=0.28.1",
     "textual==8.2.8",
 ]
 
 [project.scripts]
-logtui = "tui_log_viewer.runners.cli:main"
+logviewer = "tui_log_viewer.runners.cli:main"
 generate-stubs = "tui_log_viewer.scripts.generate_colour_stubs:generate"
 
 [dependency-groups]
@@ -40,6 +41,8 @@ dev = [
     "pytest-asyncio>=1.4.0",
     # Validating build distribution
     "twine>=6.2.0",
+    # Textual live-editing and debugging
+    "textual-dev>=1.8.0",
 ]
 
 [tool.pyright]

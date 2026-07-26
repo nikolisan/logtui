@@ -1,10 +1,13 @@
 import argparse
 import asyncio
 import logging
+from collections.abc import Sequence
 
 from tui_log_viewer.cli import LogParser
 from tui_log_viewer.cli.tools import printer, printer_header
 from tui_log_viewer.runners.arg_parser import parse_arguments
+
+# from tui_log_viewer.tui.app import run as tui_run
 
 logger = logging.getLogger(__name__)
 
@@ -26,11 +29,20 @@ async def start_cli_no_tui(args: argparse.Namespace):
             await follow_generator.aclose()
 
 
-def main():
-    args = parse_arguments()
+async def async_start_cli_no_tui(argv: Sequence[str] | None = None):
+    args = parse_arguments(argv)
+    await start_cli_no_tui(args)
+    return 0
+
+
+def main(argv: Sequence[str] | None = None):
+    args = parse_arguments(argv)
     try:
         if args.engine == "log":
             asyncio.run(start_cli_no_tui(args))
+        # elif args.engine == "tui":
+        #     tui_run()
+
     except KeyboardInterrupt:
         logger.info("Stopped following log file")
     except Exception as e:
